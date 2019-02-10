@@ -39,8 +39,8 @@ if (!room) {
 }
 
 /****************************************************************************
-* Signaling server
-****************************************************************************/
+ * Signaling server
+ ****************************************************************************/
 
 // Connect to the signaling server
 var socket = io.connect();
@@ -139,23 +139,23 @@ function sendMessage(message) {
  ****************************************************************************/
 
 function grabWebCamVideo() {
-    console.log('Gettting user medit (video) ...');
+    console.log('Getting user media (video) ...');
     navigator.mediaDevices.getUserMedia({
         audio: false,
         video: true
     }).then(gotStream).catch(function (e) {
-        alert('getUserMedia() error: ' + e.name)
+        alert('getUserMedia() error: ' + e.name);
     });
 }
 
 function gotStream(stream) {
-    console.log('getUserMedia video stream URL: ', stream);
-    window.stream = stream;
+    console.log('getUserMedia video stream URL:', stream);
+    window.stream = stream; // stream available to console
     video.srcObject = stream;
-    video.onloadedmetadata = function () {
+    video.onloadedmetadata = function() {
         photo.width = photoContextW = video.videoWidth;
         photo.height = photoContextH = video.videoHeight;
-        console.log('gotStream with width and height:', photoContextW, photoContextH)
+        console.log('gotStream with width and height:', photoContextW, photoContextH);
     };
     show(snapBtn);
 }
@@ -172,13 +172,16 @@ function signalingMessageCallback(message) {
         console.log('Got offer. Sending answer to peer.');
         peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, logError);
         peerConn.createAnswer(onLocalSessionCreated, logError);
+
     } else if (message.type === 'answer') {
         console.log('Got answer.');
         peerConn.setRemoteDescription(new RTCSessionDescription(message), function () {}, logError);
+
     } else if (message.type === 'candidate') {
         peerConn.addIceCandidate(new RTCIceCandidate({
             candidate: message.candidate
         }));
+
     }
 }
 
@@ -186,8 +189,8 @@ function createPeerConnection(isInitiator, config) {
     console.log('Creating Peer connection as initiator?', isInitiator, 'config:', config);
     peerConn = new RTCPeerConnection(config);
 
-    // send any ice candidates to the other peer
-    peerConn.onicecandidate = function (event) {
+// send any ice candidates to the other peer
+    peerConn.onicecandidate = function(event) {
         console.log('icecandidate event:', event);
         if (event.candidate) {
             sendMessage({
@@ -195,7 +198,7 @@ function createPeerConnection(isInitiator, config) {
                 label: event.candidate.sdpMLineIndex,
                 id: event.candidate.sdpMid,
                 candidate: event.candidate.candidate
-            })
+            });
         } else {
             console.log('End of candidates.');
         }
@@ -254,6 +257,7 @@ function receiveDataChromeFactory() {
             console.log('Expecting a total of ' + buf.byteLength + ' bytes');
             return;
         }
+
         var data = new Uint8ClampedArray(event.data);
         buf.set(data, count);
 
@@ -291,7 +295,7 @@ function receiveDataFirefoxFactory() {
                 var reader = new FileReader();
                 reader.onload = function() {
                     buf.set(new Uint8ClampedArray(this.result), pos);
-                    if (i + 1 === parts.lenbits) {
+                    if (i + 1 === parts.length) {
                         console.log('Done. Rendering photo.');
                         renderPhoto(buf);
                     } else {
@@ -371,6 +375,12 @@ function renderPhoto(data) {
 function show() {
     Array.prototype.forEach.call(arguments, function(elem) {
         elem.style.display = null;
+    });
+}
+
+function hide() {
+    Array.prototype.forEach.call(arguments, function(elem) {
+        elem.style.display = 'none';
     });
 }
 
